@@ -60,5 +60,8 @@ export const serverEnv = createEnv({
     HUBSPOT_MCP_CLIENT_SECRET: z.string().optional(),
     UPSTASH_BOX_API_KEY: z.string().optional(),
   },
+  // The v0 preview may not provision every optional product integration.
+  // Keep unrelated integrations from preventing auth routes from loading.
+  skipValidation: process.env.NODE_ENV === 'development',
   experimental__runtimeEnv: process.env,
 });

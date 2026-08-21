@@ -64,10 +64,12 @@ export const polarClient = new Polar({
   ...(process.env.NODE_ENV === 'production' ? {} : { server: 'sandbox' }),
 });
 
-export const dodoPayments = new DodoPayments({
-  bearerToken: process.env.DODO_PAYMENTS_API_KEY!,
-  ...(process.env.NODE_ENV === 'production' ? { environment: 'live_mode' } : { environment: 'test_mode' }),
-});
+export const dodoPayments = process.env.DODO_PAYMENTS_API_KEY
+  ? new DodoPayments({
+      bearerToken: process.env.DODO_PAYMENTS_API_KEY,
+      ...(process.env.NODE_ENV === 'production' ? { environment: 'live_mode' } : { environment: 'test_mode' }),
+    })
+  : null;
 
 // Helper function to handle subscription webhooks
 async function handleSubscriptionWebhook(payload: any, status: string) {
@@ -206,7 +208,13 @@ async function handleSubscriptionWebhook(payload: any, status: string) {
 
 export const auth = betterAuth({
   appName: 'scira',
-  baseURL: process.env.NODE_ENV === 'production' ? process.env.BETTER_AUTH_BASE_URL : 'http://localhost:3000',
+  baseURL:
+    process.env.BETTER_AUTH_URL ??
+    (process.env.VERCEL_PROJECT_PRODUCTION_URL
+      ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+      : process.env.VERCEL_URL
+        ? `https://${process.env.VERCEL_URL}`
+        : process.env.V0_RUNTIME_URL ?? 'http://localhost:3000'),
   rateLimit: {
     max: 100,
     window: 60,
@@ -434,8 +442,10 @@ export const auth = betterAuth({
         }),
       ],
     }),
-    dodopayments({
-      client: dodoPayments,
+    ...(dodoPayments
+      ? [
+          dodopayments({
+            client: dodoPayments,
       createCustomerOnSignUp: true,
       use: [
         dodocheckout({
@@ -537,18 +547,40 @@ export const auth = betterAuth({
             await handleSubscriptionWebhook(payload, 'expired');
           },
         }),
-      ],
-    }),
+          ],
+        }),
+      ]
+      : []),
     nextCookies(),
   ],
   trustedOrigins: [
-    'http://localhost:3000',
+    ...(process.env.NODE_ENV === 'development'
+      ? [
+          'http://localhost:3000',
+          ...(process.env.V0_RUNTIME_URL ? [process.env.V0_RUNTIME_URL] : []),
+          ...(process.env.V0_DEV_APP_URL ? [process.env.V0_DEV_APP_URL] : []),
+          ...(process.env.V0_BUILD_URL ? [process.env.V0_BUILD_URL] : []),
+          ...(process.env.V0_SANDBOX_URL ? [process.env.V0_SANDBOX_URL] : []),
+        ]
+      : []),
+    ...(process.env.NODE_ENV === 'production'
+      ? [
+          ...(process.env.VERCEL_URL ? [`https://${process.env.VERCEL_URL}`] : []),
+          ...(process.env.VERCEL_PROJECT_PRODUCTION_URL
+            ? [`https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`]
+            : []),
+        ]
+      : []),
     'https://scira.ai',
     'https://www.scira.ai',
     'https://scira-zaidmukaddam-sciraai.vercel.app',
   ],
   allowedOrigins: [
     'http://localhost:3000',
+    ...(process.env.V0_RUNTIME_URL ? [process.env.V0_RUNTIME_URL] : []),
+    ...(process.env.V0_DEV_APP_URL ? [process.env.V0_DEV_APP_URL] : []),
+    ...(process.env.V0_BUILD_URL ? [process.env.V0_BUILD_URL] : []),
+    ...(process.env.V0_SANDBOX_URL ? [process.env.V0_SANDBOX_URL] : []),
     'https://scira.ai',
     'https://www.scira.ai',
     'https://scira-zaidmukaddam-sciraai.vercel.app',

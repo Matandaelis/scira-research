@@ -15,13 +15,13 @@ import { HapticsProvider } from '@/components/haptics-provider';
 import { Providers } from './providers';
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://scira.ai'),
+  metadataBase: new URL('https://morrow.academy'),
   title: {
-    default: 'Scira AI - Research anything. Do anything.',
-    template: '%s | Scira AI',
+    default: 'Morrow — Academic research, with provenance',
+    template: '%s | Morrow',
   },
   description:
-    'Scira is an AI assistant that searches the web in depth, cites sources, and connects to 100+ apps including GitHub, Notion, and Slack.',
+    'Morrow is a focused workspace for academic research, thesis writing, source management, citations, and research integrity.',
   openGraph: {
     url: 'https://scira.ai',
     siteName: 'Scira AI',
