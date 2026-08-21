@@ -20,6 +20,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
+import type { LucideIcon } from 'lucide-react';
 
 const projects = [
   {
@@ -45,7 +46,7 @@ const projects = [
   },
 ];
 
-const activity = [
+const activity: { icon: LucideIcon; title: string; detail: string; status: string }[] = [
   { icon: FileText, title: 'Chapter 2 — Literature review', detail: 'Word count · 2,480 / 4,000', status: 'In progress' },
   { icon: Library, title: '12 sources need reading notes', detail: 'Source library · Urban heat adaptation', status: 'Review' },
   { icon: ShieldCheck, title: 'Citation coverage improved to 86%', detail: 'Integrity review · AI-assisted learning', status: 'Ready' },
@@ -64,13 +65,13 @@ export function AcademicWorkspace() {
           </Link>
           <p className="mt-10 px-2 text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Workspace</p>
           <nav className="mt-3 flex flex-col gap-1" aria-label="Academic workspace">
-            {[
+            {([
               ['Overview', BookOpen, true],
               ['Projects', FolderKanban, false],
               ['Documents', FileText, false],
               ['Source library', Library, false],
               ['Research chat', Search, false],
-            ].map(([label, Icon, active]) => (
+            ] as [string, LucideIcon, boolean][]).map(([label, Icon, active]) => (
               <Link
                 key={label as string}
                 href="#"

@@ -7,15 +7,13 @@ export const maindb = drizzle(serverEnv.DATABASE_URL, {
   schema,
 });
 
-const dbread1 = drizzle(process.env.READ_DB_1!, {
-  schema,
-});
+const replicaUrls = [process.env.READ_DB_1, process.env.READ_DB_2].filter(
+  (url): url is string => Boolean(url),
+);
 
-const dbread2 = drizzle(process.env.READ_DB_2!, {
-  schema,
-});
+const replicas = replicaUrls.map((url) => drizzle(url, { schema }));
 
-export const db = withReplicas(maindb, [dbread1, dbread2]);
+export const db = replicas.length > 0 ? withReplicas(maindb, [replicas[0], ...replicas.slice(1)]) : maindb;
 
-// Export all database instances for cache invalidation
-export const allDatabases = [maindb, dbread1, dbread2] as const;
+// Export all database instances for cache invalidation.
+export const allDatabases = [maindb, ...replicas] as const;

@@ -799,6 +799,10 @@ export async function previewMaxUpgrade() {
       return { success: false, error: 'Already on Max plan' };
     }
 
+    if (!dodoPayments) {
+      return { success: false, error: 'Dodo Payments is not configured.' };
+    }
+
     const maxProductId = process.env.NEXT_PUBLIC_MAX_TIER;
     if (!maxProductId) {
       return { success: false, error: 'NEXT_PUBLIC_MAX_TIER environment variable is required' };
@@ -891,6 +895,10 @@ export async function upgradeToMax() {
       return { success: false, error: 'Already on Max plan' };
     }
 
+    if (!dodoPayments) {
+      return { success: false, error: 'Dodo Payments is not configured.' };
+    }
+
     const maxProductId = process.env.NEXT_PUBLIC_MAX_TIER;
     if (!maxProductId) {
       return { success: false, error: 'NEXT_PUBLIC_MAX_TIER environment variable is required' };
@@ -967,6 +975,10 @@ export async function previewDowngradeToPro() {
       return { success: false, error: 'Preview is only available for active Dodo Max subscriptions' };
     }
 
+    if (!dodoPayments) {
+      return { success: false, error: 'Dodo Payments is not configured.' };
+    }
+
     const dodoMaxProductId = process.env.NEXT_PUBLIC_MAX_TIER;
     const dodoProProductId = process.env.NEXT_PUBLIC_PREMIUM_TIER;
     if (!dodoMaxProductId) {
@@ -1026,6 +1038,10 @@ export async function downgradeToPro() {
 
     if (!userData.isMaxUser || userData.proSource !== 'dodo') {
       return { success: false, error: 'Downgrade is only available for active Dodo Max subscriptions' };
+    }
+
+    if (!dodoPayments) {
+      return { success: false, error: 'Dodo Payments is not configured.' };
     }
 
     const dodoMaxProductId = process.env.NEXT_PUBLIC_MAX_TIER;

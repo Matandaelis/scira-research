@@ -17,6 +17,70 @@ import { generateId } from 'ai';
 import { InferSelectModel } from 'drizzle-orm';
 import { v7 as uuidv7 } from 'uuid';
 
+export const academicProject = pgTable(
+  'academic_project',
+  {
+    id: text('id').primaryKey().$defaultFn(() => generateId()),
+    userId: text('user_id').notNull(),
+    title: text('title').notNull(),
+    type: varchar('type', { enum: ['thesis', 'dissertation', 'literature_review', 'research_paper', 'research_question'] }).notNull().default('thesis'),
+    discipline: text('discipline'),
+    stage: varchar('stage', { enum: ['scoping', 'researching', 'drafting', 'revising', 'defending'] }).notNull().default('scoping'),
+    status: varchar('status', { enum: ['active', 'archived'] }).notNull().default('active'),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  },
+  (table) => [index('academic_project_user_idx').on(table.userId)],
+);
+
+export const academicDocument = pgTable(
+  'academic_document',
+  {
+    id: text('id').primaryKey().$defaultFn(() => generateId()),
+    projectId: text('project_id').notNull(),
+    userId: text('user_id').notNull(),
+    title: text('title').notNull(),
+    kind: varchar('kind', { enum: ['outline', 'chapter', 'literature_review', 'notes', 'draft'] }).notNull().default('draft'),
+    content: text('content').notNull().default(''),
+    wordCount: integer('word_count').notNull().default(0),
+    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  },
+  (table) => [index('academic_document_project_idx').on(table.projectId), index('academic_document_user_idx').on(table.userId)],
+);
+
+export const academicSource = pgTable(
+  'academic_source',
+  {
+    id: text('id').primaryKey().$defaultFn(() => generateId()),
+    projectId: text('project_id').notNull(),
+    userId: text('user_id').notNull(),
+    title: text('title').notNull(),
+    authors: text('authors'),
+    year: integer('year'),
+    url: text('url'),
+    doi: text('doi'),
+    sourceType: varchar('source_type', { enum: ['journal', 'book', 'conference', 'web', 'dataset', 'other'] }).notNull().default('journal'),
+    notes: text('notes'),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+  },
+  (table) => [index('academic_source_project_idx').on(table.projectId), index('academic_source_user_idx').on(table.userId)],
+);
+
+export const academicCitation = pgTable(
+  'academic_citation',
+  {
+    id: text('id').primaryKey().$defaultFn(() => generateId()),
+    projectId: text('project_id').notNull(),
+    userId: text('user_id').notNull(),
+    sourceId: text('source_id').notNull(),
+    documentId: text('document_id'),
+    style: varchar('style', { enum: ['apa7', 'mla9', 'chicago17', 'harvard', 'ieee'] }).notNull().default('apa7'),
+    locator: text('locator'),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+  },
+  (table) => [index('academic_citation_project_idx').on(table.projectId), index('academic_citation_user_idx').on(table.userId)],
+);
+
 export const user = pgTable('user', {
   id: text('id').primaryKey(),
   name: text('name').notNull(),

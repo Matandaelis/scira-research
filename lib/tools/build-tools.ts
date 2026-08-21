@@ -708,7 +708,10 @@ function createBuildWebSearchTool(dataStream: UIMessageStreamWriter<ChatMessage>
           const startPublishedDate = startDate ? new Date(startDate).toISOString() : undefined;
           const endPublishedDate = startDate ? new Date().toISOString() : undefined;
 
-          const exaCategory = category ?? undefined;
+          const exaCategory =
+            category && ['company', 'financial report', 'news', 'people', 'personal site', 'publication'].includes(category)
+              ? (category as 'company' | 'financial report' | 'news' | 'people' | 'personal site' | 'publication')
+              : undefined;
 
           const { results: exaResults } = await exa.search(query, {
             numResults: 6,

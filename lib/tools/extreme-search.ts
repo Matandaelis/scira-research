@@ -514,24 +514,14 @@ class ExaSearchStrategy implements SearchProviderStrategy {
       const endPublishedDate = startDate ? new Date().toISOString() : undefined;
 
       // Valid Exa categories (matching the Exa API type)
-      type ExaCategory =
-        | 'news'
-        | 'company'
-        | 'research paper'
-        | 'financial report'
-        | 'pdf'
-        | 'tweet'
-        | 'personal site'
-        | 'people';
+      type ExaCategory = 'news' | 'company' | 'financial report' | 'personal site' | 'people' | 'publication';
       const validExaCategories: ExaCategory[] = [
         'news',
         'company',
-        'research paper',
         'financial report',
-        'pdf',
-        'tweet',
         'personal site',
         'people',
+        'publication',
       ];
       const exaCategory =
         category && validExaCategories.includes(category as ExaCategory) ? (category as ExaCategory) : undefined;

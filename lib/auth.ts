@@ -207,7 +207,7 @@ async function handleSubscriptionWebhook(payload: any, status: string) {
 }
 
 export const auth = betterAuth({
-  appName: 'scira',
+  appName: 'morrow',
   baseURL:
     process.env.BETTER_AUTH_URL ??
     (process.env.VERCEL_PROJECT_PRODUCTION_URL
@@ -257,45 +257,58 @@ export const auth = betterAuth({
     },
   }),
   socialProviders: {
-    github: {
-      clientId: serverEnv.GITHUB_CLIENT_ID,
-      clientSecret: serverEnv.GITHUB_CLIENT_SECRET,
-    },
-    google: {
-      clientId: serverEnv.GOOGLE_CLIENT_ID,
-      clientSecret: serverEnv.GOOGLE_CLIENT_SECRET,
-    },
-    twitter: {
-      clientId: serverEnv.TWITTER_CLIENT_ID,
-      clientSecret: serverEnv.TWITTER_CLIENT_SECRET,
-    },
-    microsoft: {
-      clientId: process.env.MICROSOFT_CLIENT_ID as string,
-      clientSecret: process.env.MICROSOFT_CLIENT_SECRET as string,
-      prompt: 'select_account', // Forces account selection
-    },
+    ...(serverEnv.GITHUB_CLIENT_ID && serverEnv.GITHUB_CLIENT_SECRET
+      ? {
+          github: {
+            clientId: serverEnv.GITHUB_CLIENT_ID,
+            clientSecret: serverEnv.GITHUB_CLIENT_SECRET,
+          },
+        }
+      : {}),
+    ...(serverEnv.GOOGLE_CLIENT_ID && serverEnv.GOOGLE_CLIENT_SECRET
+      ? {
+          google: {
+            clientId: serverEnv.GOOGLE_CLIENT_ID,
+            clientSecret: serverEnv.GOOGLE_CLIENT_SECRET,
+          },
+        }
+      : {}),
+    ...(serverEnv.TWITTER_CLIENT_ID && serverEnv.TWITTER_CLIENT_SECRET
+      ? {
+          twitter: {
+            clientId: serverEnv.TWITTER_CLIENT_ID,
+            clientSecret: serverEnv.TWITTER_CLIENT_SECRET,
+          },
+        }
+      : {}),
+    ...(process.env.MICROSOFT_CLIENT_ID && process.env.MICROSOFT_CLIENT_SECRET
+      ? {
+          microsoft: {
+            clientId: process.env.MICROSOFT_CLIENT_ID,
+            clientSecret: process.env.MICROSOFT_CLIENT_SECRET,
+            prompt: 'select_account' as const,
+          },
+        }
+      : {}),
   },
   plugins: [
     dash(),
     lastLoginMethod(),
-    polar({
-      client: polarClient,
-      createCustomerOnSignUp: false,
-      enableCustomerPortal: true,
+    ...(process.env.POLAR_ACCESS_TOKEN &&
+    process.env.NEXT_PUBLIC_STARTER_TIER &&
+    process.env.NEXT_PUBLIC_STARTER_SLUG &&
+    process.env.POLAR_WEBHOOK_SECRET
+      ? [
+          polar({
+            client: polarClient,
+            createCustomerOnSignUp: false,
+            enableCustomerPortal: true,
       use: [
         checkout({
           products: [
             {
-              productId:
-                process.env.NEXT_PUBLIC_STARTER_TIER ||
-                (() => {
-                  throw new Error('NEXT_PUBLIC_STARTER_TIER environment variable is required');
-                })(),
-              slug:
-                process.env.NEXT_PUBLIC_STARTER_SLUG ||
-                (() => {
-                  throw new Error('NEXT_PUBLIC_STARTER_SLUG environment variable is required');
-                })(),
+              productId: process.env.NEXT_PUBLIC_STARTER_TIER,
+              slug: process.env.NEXT_PUBLIC_STARTER_SLUG,
             },
           ],
           successUrl: `/success`,
@@ -304,11 +317,7 @@ export const auth = betterAuth({
         portal(),
         usage(),
         webhooks({
-          secret:
-            process.env.POLAR_WEBHOOK_SECRET ||
-            (() => {
-              throw new Error('POLAR_WEBHOOK_SECRET environment variable is required');
-            })(),
+          secret: process.env.POLAR_WEBHOOK_SECRET,
           onPayload: async ({ data, type }) => {
             if (
               type === 'subscription.created' ||
@@ -441,8 +450,15 @@ export const auth = betterAuth({
           },
         }),
       ],
-    }),
-    ...(dodoPayments
+          }),
+        ]
+      : []),
+    ...(dodoPayments &&
+    process.env.NEXT_PUBLIC_PREMIUM_TIER &&
+    process.env.NEXT_PUBLIC_PREMIUM_SLUG &&
+    process.env.NEXT_PUBLIC_MAX_TIER &&
+    process.env.NEXT_PUBLIC_MAX_SLUG &&
+    process.env.DODO_PAYMENTS_WEBHOOK_SECRET
       ? [
           dodopayments({
             client: dodoPayments,
@@ -451,28 +467,12 @@ export const auth = betterAuth({
         dodocheckout({
           products: [
             {
-              productId:
-                process.env.NEXT_PUBLIC_PREMIUM_TIER ||
-                (() => {
-                  throw new Error('NEXT_PUBLIC_PREMIUM_TIER environment variable is required');
-                })(),
-              slug:
-                process.env.NEXT_PUBLIC_PREMIUM_SLUG ||
-                (() => {
-                  throw new Error('NEXT_PUBLIC_PREMIUM_SLUG environment variable is required');
-                })(),
+              productId: process.env.NEXT_PUBLIC_PREMIUM_TIER,
+              slug: process.env.NEXT_PUBLIC_PREMIUM_SLUG,
             },
             {
-              productId:
-                process.env.NEXT_PUBLIC_MAX_TIER ||
-                (() => {
-                  throw new Error('NEXT_PUBLIC_MAX_TIER environment variable is required');
-                })(),
-              slug:
-                process.env.NEXT_PUBLIC_MAX_SLUG ||
-                (() => {
-                  throw new Error('NEXT_PUBLIC_MAX_SLUG environment variable is required');
-                })(),
+              productId: process.env.NEXT_PUBLIC_MAX_TIER,
+              slug: process.env.NEXT_PUBLIC_MAX_SLUG,
             },
           ],
           successUrl: '/success',
